@@ -34,24 +34,24 @@ aws ec2 create-tags --resources $routeTableId --tags --tags Key=Name,Value=$name
 export routeTableAssoc=`aws ec2 associate-route-table --route-table-id $routeTableId --subnet-id $subnetId --output text`
 aws ec2 create-route --route-table-id $routeTableId --destination-cidr-block 0.0.0.0/0 --gateway-id $internetGatewayId
 
-export securityGroupId=`aws ec2 create-security-group --group-name $name-security-group --description "SG for fast.ai machine" --vpc-id $vpcId --query 'GroupId' --output text`
+export securityGroupId=`aws ec2 create-security-group --group-name $name-security-group --description "SG for main machine" --vpc-id $vpcId --query 'GroupId' --output text`
 # ssh
 aws ec2 authorize-security-group-ingress --group-id $securityGroupId --protocol tcp --port 22 --cidr $cidr
 # jupyter notebook
-aws ec2 authorize-security-group-ingress --group-id $securityGroupId --protocol tcp --port 8888-8898 --cidr $cidr
+# aws ec2 authorize-security-group-ingress --group-id $securityGroupId --protocol tcp --port 8888-8898 --cidr $cidr
 
 if [ ! -d ~/.ssh ]
 then
-	mkdir ~/.ssh
+  mkdir ~/.ssh
 fi
 
 if [ ! -f ~/.ssh/aws-key-$name.pem ]
 then
-	aws ec2 create-key-pair --key-name aws-key-$name --query 'KeyMaterial' --output text > ~/.ssh/aws-key-$name.pem
-	chmod 400 ~/.ssh/aws-key-$name.pem
+  aws ec2 create-key-pair --key-name aws-key-$name --query 'KeyMaterial' --output text > ~/.ssh/aws-key-$name.pem
+  chmod 400 ~/.ssh/aws-key-$name.pem
 fi
 
-export instanceId=`aws ec2 run-instances --image-id $ami --count 1 --instance-type t2.nano --key-name aws-key-$name --security-group-ids $securityGroupId --subnet-id $subnetId --associate-public-ip-address --query 'Instances[0].InstanceId' --output text`
+export instanceId=`aws ec2 run-instances --image-id $ami --count 1 --instance-type t2.micro --key-name aws-key-$name --security-group-ids $securityGroupId --subnet-id $subnetId --associate-public-ip-address --query 'Instances[0].InstanceId' --output text`
 aws ec2 create-tags --resources $instanceId --tags --tags Key=Name,Value=$name-main-instance#
 export allocAddr=`aws ec2 allocate-address --domain vpc --query 'AllocationId' --output text`
 
@@ -65,7 +65,7 @@ export instanceUrl=`aws ec2 describe-instances --instance-ids $instanceId --quer
 # reboot instance, because I was getting "Failed to initialize NVML: Driver/library version mismatch"
 # error when running the nvidia-smi command
 # see also http://forums.fast.ai/t/no-cuda-capable-device-is-detected/168/13
-aws ec2 reboot-instances --instance-ids $instanceId
+# aws ec2 reboot-instances --instance-ids $instanceId
 
 # save commands to file
 echo \# Connect to your instance: > $name-commands.txt # overwrite existing file
@@ -109,9 +109,22 @@ echo aws ec2 delete-internet-gateway --internet-gateway-id $internetGatewayId >>
 echo aws ec2 delete-subnet --subnet-id $subnetId >> $name-remove.sh
 
 echo aws ec2 delete-vpc --vpc-id $vpcId >> $name-remove.sh
-echo echo If you want to delete the key-pair, please do it manually. >> $name-remove.sh
+echo aws ec2 delete-key-pair --key-name aws-key-$name >> $name-remove.sh
+echo rm -f ~/.ssh/aws-key-$name.pem >> $name-remove.sh
+echo rm -f ~/aws_scripts/main* >> $name-remove.sh
+
+if [ ! -d ~/aws_scripts ]
+then
+  mkdir ~/aws_scripts
+fi
+
+echo ssh -i ~/.ssh/aws-key-$name.pem ubuntu@$instanceUrl > ~/aws_scripts/main_connect
+echo aws ec2 stop-instances --instance-ids $instanceId > ~/aws_scripts/main_stop
+echo aws ec2 start-instances --instance-ids $instanceId > ~/aws_scripts/main_start
+echo aws ec2 reboot-instances --instance-ids $instanceId > ~/aws_scripts/main_reboot
+chmod +x ~/aws_scripts/*
 
 chmod +x $name-remove.sh
 
 echo All done. Find all you need to connect in the $name-commands.txt file and to remove the stack call $name-remove.sh
-echo Connect to your instance: ssh -i ~/.ssh/aws-key-$name.pem ec2-user@$instanceUrl
+echo Connect to your instance: ssh -i ~/.ssh/aws-key-$name.pem ubuntu@$instanceUrl
