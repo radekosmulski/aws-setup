@@ -1,0 +1,20 @@
+# Connect to your instance:
+ssh -i /home/radek/.ssh/aws-key-gpu-instance.pem ubuntu@ec2-34-248-6-176.eu-west-1.compute.amazonaws.com
+# Stop your instance: :
+aws ec2 stop-instances --instance-ids i-0847435d66bf859ff
+# Start your instance:
+aws ec2 start-instances --instance-ids i-0847435d66bf859ff
+# Reboot your instance:
+aws ec2 reboot-instances --instance-ids i-0847435d66bf859ff
+export instanceId=i-0847435d66bf859ff
+export subnetId=subnet-e907359f
+export securityGroupId=sg-8ef7d1e8
+export instanceUrl=ec2-34-248-6-176.eu-west-1.compute.amazonaws.com
+export routeTableId=
+export name=gpu-instance
+export vpcId=
+export internetGatewayId=
+export subnetId=subnet-e907359f
+export allocAddr=eipalloc-12323c76
+export assocId=eipassoc-be67b3c6
+export routeTableAssoc=
