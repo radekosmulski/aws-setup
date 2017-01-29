@@ -5,8 +5,6 @@
 export name="gpu-instance"
 export cidr="0.0.0.0/0"
 export ami="ami-6f587e1c"
-export securityGroupId="sg-8ef7d1e8"
-export subnetId="subnet-e907359f"
 
 hash aws 2>/dev/null
 if [ $? -ne 0 ]; then
@@ -57,18 +55,19 @@ echo \# Reboot your instance: >> $name-commands.txt
 echo aws ec2 reboot-instances --instance-ids $instanceId  >> $name-commands.txt
 echo ""
 # export vars to be sure
-echo export instanceId=$instanceId >> $name-commands.txt
-echo export subnetId=$subnetId >> $name-commands.txt
-echo export securityGroupId=$securityGroupId >> $name-commands.txt
-echo export instanceUrl=$instanceUrl >> $name-commands.txt
-echo export routeTableId=$routeTableId >> $name-commands.txt
-echo export name=$name >> $name-commands.txt
-echo export vpcId=$vpcId >> $name-commands.txt
-echo export internetGatewayId=$internetGatewayId >> $name-commands.txt
-echo export subnetId=$subnetId >> $name-commands.txt
-echo export allocAddr=$allocAddr >> $name-commands.txt
-echo export assocId=$assocId >> $name-commands.txt
-echo export routeTableAssoc=$routeTableAssoc >> $name-commands.txt
+echo "#!/bin/bash" > $name-vars.sh # overwrite existing file
+echo export instanceId=$instanceId >> $name-vars.sh
+echo export subnetId=$subnetId >> $name-vars.sh
+echo export securityGroupId=$securityGroupId >> $name-vars.sh
+echo export instanceUrl=$instanceUrl >> $name-vars.sh
+echo export routeTableId=$routeTableId >> $name-vars.sh
+echo export name=$name >> $name-vars.sh
+echo export vpcId=$vpcId >> $name-vars.sh
+echo export internetGatewayId=$internetGatewayId >> $name-vars.sh
+echo export subnetId=$subnetId >> $name-vars.sh
+echo export allocAddr=$allocAddr >> $name-vars.sh
+echo export assocId=$assocId >> $name-vars.sh
+echo export routeTableAssoc=$routeTableAssoc >> $name-vars.sh
 
 # save delete commands for cleanup
 echo "#!/bin/bash" > $name-remove.sh # overwrite existing file
@@ -78,9 +77,17 @@ echo aws ec2 release-address --allocation-id $allocAddr >> $name-remove.sh
 # volume gets deleted with the instance automatically
 echo aws ec2 terminate-instances --instance-ids $instanceId >> $name-remove.sh
 echo aws ec2 wait instance-terminated --instance-ids $instanceId >> $name-remove.sh
-echo echo If you want to delete the key-pair, please do it manually. >> $name-remove.sh
 
+echo rm -f ~/.ssh/aws-key-$name.pem >> $name-remove.sh
+echo rm -f ~/aws_scripts/main* >> $name-remove.sh
+echo rm -f $name-vars.sh $name-commands.txt $name-remove.sh >> $name-remove.sh
 chmod +x $name-remove.sh
+
+echo ssh -i ~/.ssh/aws-key-$name.pem ubuntu@$instanceUrl > ~/aws_scripts/$name-connect
+echo aws ec2 stop-instances --instance-ids $instanceId > ~/aws_scripts/$name-stop
+echo aws ec2 start-instances --instance-ids $instanceId > ~/aws_scripts/$name-start
+echo aws ec2 reboot-instances --instance-ids $instanceId > ~/aws_scripts/$name-reboot
+chmod +x ~/aws_scripts/$name*
 
 echo All done. Find all you need to connect in the $name-commands.txt file and to remove the stack call $name-remove.sh
 echo Connect to your instance: ssh -i ~/.ssh/aws-key-$name.pem ec2-user@$instanceUrl
