@@ -54,7 +54,6 @@ export instanceUrl=`aws ec2 describe-instances --instance-ids $instanceId --quer
 
 . util/save-instance-vars-and-commands.sh
 
-# volume gets deleted with the instance automatically
 echo aws ec2 delete-security-group --group-id $securityGroupId >> $name-remove.sh
 
 echo aws ec2 disassociate-route-table --association-id $routeTableAssoc >> $name-remove.sh

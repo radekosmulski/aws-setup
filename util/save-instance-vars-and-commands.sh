@@ -22,9 +22,9 @@ echo aws ec2 wait instance-terminated --instance-ids $instanceId >> $name-remove
 echo rm -f ~/.ssh/aws-key-$name.pem >> $name-remove.sh
 echo rm -f ~/aws_scripts/$name* >> $name-remove.sh
 echo rm -f $name-vars.sh $name-commands.txt $name-remove.sh >> $name-remove.sh
-
 chmod +x $name-remove.sh
 
+# Save variables
 echo "#!/bin/bash" > $name-vars.sh # overwrite existing file
 echo export instanceId=$instanceId >> $name-vars.sh
 echo export subnetId=$subnetId >> $name-vars.sh
@@ -39,14 +39,13 @@ echo export allocAddr=$allocAddr >> $name-vars.sh
 echo export assocId=$assocId >> $name-vars.sh
 echo export routeTableAssoc=$routeTableAssoc >> $name-vars.sh
 
+# Create maintenance scripts
 if [ ! -d ~/aws_scripts ]
 then
   mkdir ~/aws_scripts
 fi
-
 echo ssh -i ~/.ssh/aws-key-$name.pem ubuntu@$instanceUrl > ~/aws_scripts/$name-connect
 echo aws ec2 stop-instances --instance-ids $instanceId > ~/aws_scripts/$name-stop
 echo aws ec2 start-instances --instance-ids $instanceId > ~/aws_scripts/$name-start
 echo aws ec2 reboot-instances --instance-ids $instanceId > ~/aws_scripts/$name-reboot
-
 chmod +x ~/aws_scripts/$name*

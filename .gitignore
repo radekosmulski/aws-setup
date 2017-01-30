@@ -4,3 +4,4 @@ gpu-instance-remove.sh
 main-instance-commands.txt
 main-instance-remove.sh
 main-instance-vars.sh
+gpu-instance-vars.sh
