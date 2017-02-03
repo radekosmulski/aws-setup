@@ -21,6 +21,9 @@ echo aws ec2 wait instance-terminated --instance-ids $instanceId >> $name-remove
 
 echo rm -f ~/.ssh/aws-key-$name.pem >> $name-remove.sh
 echo rm -f ~/aws_scripts/$name* >> $name-remove.sh
+echo rm -f ~/aws_scripts/authorize-current-ip >> $name-remove.sh
+echo rm -f ~/aws_scripts/deauthorize-ip >> $name-remove.sh
+echo rm -f ~/aws_scripts/list-authorized-ips >> $name-remove.sh
 echo rm -f $name-vars.sh $name-commands.txt $name-remove.sh >> $name-remove.sh
 chmod +x $name-remove.sh
 
@@ -49,4 +52,14 @@ echo aws ec2 stop-instances --instance-ids $instanceId > ~/aws_scripts/$name-sto
 echo aws ec2 start-instances --instance-ids $instanceId > ~/aws_scripts/$name-start
 echo aws ec2 reboot-instances --instance-ids $instanceId > ~/aws_scripts/$name-reboot
 echo aws ec2 modify-instance-attribute --instance-id $instanceId --attribute instanceType --value \$1 > ~/aws_scripts/$name-resize
+echo echo \$\(aws ec2 describe-security-groups --query \'SecurityGroups[?GroupId==\`$securityGroupId\`].IpPermissions[*].[IpRanges]\' --output text\) > ~/aws_scripts/list-authorized-ips # does this list if multiple such ips exist?
+echo authorizedIp=\$\(aws ec2 describe-security-groups --query \'SecurityGroups[?GroupId==\`$securityGroupId\`].IpPermissions[*].[IpRanges][0]\' --output text\) > ~/aws_scripts/deauthorize-ip
+echo aws ec2 revoke-security-group-ingress --group-id $securityGroupId --protocol tcp --port 22 --cidr '$authorizedIp' >> ~/aws_scripts/deauthorize-ip
+echo aws ec2 revoke-security-group-ingress --group-id $securityGroupId --protocol tcp --port 8888-8898 --cidr '$authorizedIp' >> ~/aws_scripts/deauthorize-ip
+echo externalIP='$(dig +short myip.opendns.com @resolver1.opendns.com)' > ~/aws_scripts/authorize-current-ip
+echo aws ec2 authorize-security-group-ingress --group-id $securityGroupId --protocol tcp --port 22 --cidr '$externalIP'/32 >> ~/aws_scripts/authorize-current-ip
+echo aws ec2 authorize-security-group-ingress --group-id $securityGroupId --protocol tcp --port 8888-8898 --cidr '$externalIP'/32 >> ~/aws_scripts/authorize-current-ip
+echo aws ec2 describe-instances --query \'Reservations[*].Instances[*].{ID:InstanceId, type:InstanceType, state:State.Name}\' --output text > ~/aws_scripts/list-instances
+
 chmod +x ~/aws_scripts/$name*
+chmod +x ~/aws_scripts/authorize-current-ip ~/aws_scripts/list-instances ~/aws_scripts/deauthorize-ip ~/aws_scripts/list-authorized-ips
