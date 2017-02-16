@@ -21,10 +21,8 @@ echo aws ec2 wait instance-terminated --instance-ids $instanceId >> $name-remove
 
 echo rm -f ~/.ssh/aws-key-$name.pem >> $name-remove.sh
 echo rm -f ~/aws_scripts/$name* >> $name-remove.sh
-echo rm -f ~/aws_scripts/authorize-current-ip >> $name-remove.sh
-echo rm -f ~/aws_scripts/deauthorize-ip >> $name-remove.sh
-echo rm -f ~/aws_scripts/list-authorized-ips >> $name-remove.sh
 echo rm -f $name-vars.sh $name-commands.txt $name-remove.sh >> $name-remove.sh
+echo aws ec2 delete-key-pair --key-name aws-key-$name >> $name-remove.sh
 chmod +x $name-remove.sh
 
 # Save variables

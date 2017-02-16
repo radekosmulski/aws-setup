@@ -54,6 +54,8 @@ export instanceUrl=`aws ec2 describe-instances --instance-ids $instanceId --quer
 
 
 . util/save-instance-vars-and-commands.sh
+echo rm -f ~/aws_scripts/authorize-current-ip >> $name-remove.sh echo rm -f ~/aws_scripts/deauthorize-ip >> $name-remove.sh
+echo rm -f ~/aws_scripts/list-authorized-ips >> $name-remove.sh
 
 echo aws ec2 delete-security-group --group-id $securityGroupId >> $name-remove.sh
 
@@ -65,7 +67,6 @@ echo aws ec2 delete-internet-gateway --internet-gateway-id $internetGatewayId >>
 echo aws ec2 delete-subnet --subnet-id $subnetId >> $name-remove.sh
 
 echo aws ec2 delete-vpc --vpc-id $vpcId >> $name-remove.sh
-echo aws ec2 delete-key-pair --key-name aws-key-$name >> $name-remove.sh
 
 echo All done. Find all you need to connect in the $name-commands.txt file and to remove the stack call $name-remove.sh
 echo Connect to your instance: ssh -i ~/.ssh/aws-key-$name.pem ubuntu@$instanceUrl
