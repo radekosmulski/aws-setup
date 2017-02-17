@@ -21,7 +21,7 @@ export spotInstanceRequestId=`aws ec2 request-spot-instances --spot-price "$2" -
 
 export removeFileName=spot-instance-remove.sh
 echo "#!/bin/bash" > $removeFileName
-echo instanceId=`aws ec2 describe-spot-instance-requests --query 'SpotInstanceRequests[?SpotInstanceRequestId==\`'$spotInstanceRequestId'\`].[InstanceId]' --output text`
+echo instanceId=\`aws ec2 describe-spot-instance-requests --query 'SpotInstanceRequests[?SpotInstanceRequestId==\`'$spotInstanceRequestId'\`].[InstanceId]' --output text\` >> $removeFileName
 echo aws ec2 disassociate-address --association-id $assocId >> $removeFileName
 echo aws ec2 release-address --allocation-id $allocAddr >> $removeFileName
 
