@@ -32,7 +32,7 @@ echo aws ec2 delete-internet-gateway --internet-gateway-id $internetGatewayId >>
 echo aws ec2 delete-subnet --subnet-id $subnetId >> $name-remove.sh
 echo aws ec2 delete-vpc --vpc-id $vpcId >> $name-remove.sh
 
-echo rm -f ~/aws_scripts/authorize-current-ip ~/aws_scripts/list-instances ~/aws_scripts/deauthorize-ip ~/aws_scripts/list-authorized-ips >> $name-remove.sh
+echo rm -f ~/aws_scripts/authorize-current-ip ~/aws_scripts/list-instances ~/aws_scripts/deauthorize-ip ~/aws_scripts/list-authorized-ips ~/aws_scripts/cancel-open-spot-instance-requests ~/aws_scripts/list-open-spot-instance-requests ~/aws_scripts/list-active-spot-instance-requests >> $name-remove.sh
 echo rm -f $name-remove.sh $name-vars.sh >> $name-remove.sh
 chmod +x $name-remove.sh
 
@@ -61,5 +61,10 @@ echo aws ec2 revoke-security-group-ingress --group-id $securityGroupId --protoco
 echo externalIP='$(dig +short myip.opendns.com @resolver1.opendns.com)' > ~/aws_scripts/authorize-current-ip
 echo aws ec2 authorize-security-group-ingress --group-id $securityGroupId --protocol tcp --port 22 --cidr '$externalIP'/32 >> ~/aws_scripts/authorize-current-ip
 echo aws ec2 authorize-security-group-ingress --group-id $securityGroupId --protocol tcp --port 8888-8898 --cidr '$externalIP'/32 >> ~/aws_scripts/authorize-current-ip
-echo aws ec2 describe-instances --query \'Reservations[*].Instances[*].{ID:InstanceId, type:InstanceType, state:State.Name, IP: PublicIpAddress, DNSName: PublicDnsName}\' --output text > ~/aws_scripts/list-instances
-chmod +x ~/aws_scripts/authorize-current-ip ~/aws_scripts/list-instances ~/aws_scripts/deauthorize-ip ~/aws_scripts/list-authorized-ips
+echo aws ec2 describe-instances --query 'Reservations[*].Instances[*].{ID:InstanceId, type:InstanceType, state:State.Name, IP: PublicIpAddress, DNSName: PublicDnsName}' --output text > ~/aws_scripts/list-instances
+echo export spotInstanceRequestIds=`aws ec2 describe-spot-instance-requests --query 'SpotInstanceRequests[?State==\`open\`].[SpotInstanceRequestId]' --output text` > ~/aws_scripts/cancel-open-spot-instance-requests
+echo aws ec2 cancel-spot-instance-requests --spot-instance-request-ids $spotInstanceRequestId >> ~/aws_scripts/cancel-open-spot-instance-requests
+echo aws ec2 describe-spot-instance-requests --query 'SpotInstanceRequests[?State==\`open\`].[SpotInstanceRequestId]' > ~/aws_scripts/list-open-spot-instance-requests
+echo aws ec2 describe-spot-instance-requests --query 'SpotInstanceRequests[?State==\`active\`].[SpotInstanceRequestId]' > ~/aws_scripts/list-active-spot-instance-requests
+
+chmod +x ~/aws_scripts/authorize-current-ip ~/aws_scripts/list-instances ~/aws_scripts/deauthorize-ip ~/aws_scripts/list-authorized-ips ~/aws_scripts/cancel-open-spot-instance-requests ~/aws_scripts/list-open-spot-instance-requests ~/aws_scripts/list-active-spot-instance-requests
