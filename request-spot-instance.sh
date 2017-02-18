@@ -21,12 +21,12 @@ export spotInstanceRequestId=`aws ec2 request-spot-instances --spot-price "$2" -
 
 export removeFileName=spot-instance-remove.sh
 echo "#!/bin/bash" > $removeFileName
-echo instanceId=\`aws ec2 describe-spot-instance-requests --query 'SpotInstanceRequests[?SpotInstanceRequestId==\`'$spotInstanceRequestId'\`].[InstanceId]' --output text\` >> $removeFileName
+echo instanceId=\$\(aws ec2 describe-spot-instance-requests --query "'SpotInstanceRequests[?SpotInstanceRequestId==\`$spotInstanceRequestId\`].[InstanceId]'" --output text\) >> $removeFileName
 echo aws ec2 disassociate-address --association-id $assocId >> $removeFileName
 echo aws ec2 release-address --allocation-id $allocAddr >> $removeFileName
 
-echo aws ec2 terminate-instances --instance-ids $instanceId >> $name-remove.sh
-echo aws ec2 wait instance-terminated --instance-ids $instanceId >> $name-remove.sh
+echo aws ec2 terminate-instances --instance-ids \$instanceId >> $name-remove.sh
+echo aws ec2 wait instance-terminated --instance-ids \$instanceId >> $name-remove.sh
 
 echo aws ec2 delete-network-interface --network-interface-id $networkInterfaceId >> $removeFileName
 echo aws ec2 cancel-spot-instance-requests --spot-instance-request-ids $spotInstanceRequestId >> $removeFileName
