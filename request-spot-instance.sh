@@ -41,8 +41,4 @@ then
   mkdir ~/aws_scripts
 fi
 echo ssh -i ~/.ssh/aws-key-$name.pub ubuntu@$instancePublicIp > ~/aws_scripts/$name-connect
-#echo aws ec2 stop-instances --instance-ids $instanceId > ~/aws_scripts/$name-stop
-#echo aws ec2 start-instances --instance-ids $instanceId > ~/aws_scripts/$name-start
-#echo aws ec2 reboot-instances --instance-ids $instanceId > ~/aws_scripts/$name-reboot
-#echo aws ec2 modify-instance-attribute --instance-id $instanceId --attribute instanceType --value \$1 > ~/aws_scripts/$name-resize
 chmod +x ~/aws_scripts/$name*
