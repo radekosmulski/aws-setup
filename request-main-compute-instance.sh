@@ -10,7 +10,7 @@ export name="main-compute-instance"
 #export ami="ami-a77f5dc1"
 export workspaceVolumeId="vol-08fe7e3ac9f280365"
 
-export ami=`aws ec2 describe-images --owners "self" --filters Name=name,Values=$name --query 'Images[*].ImageId' --output text`
+export ami=`aws ec2 describe-images --owners "self" --filters Name=tag:Name,Values=$name --query 'Images[*].ImageId' --output text`
 if [ "$instanceId" != "" ]; then
   echo Ami with name $name does not exist.
   exit 0
@@ -61,5 +61,4 @@ then
   mkdir ~/aws_scripts
 fi
 echo ssh -i ~/.ssh/aws-key-$name.pub ubuntu@$instancePublicIp > ~/aws_scripts/$name-connect
-echo aws ec2 stop-instances --instance-ids $instanceId > ~/aws_scripts/$name-stop
 chmod +x ~/aws_scripts/$name*
