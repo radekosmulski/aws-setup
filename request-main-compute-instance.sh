@@ -10,8 +10,8 @@ export name="main-compute-instance"
 #export workspaceVolumeId="vol-08fe7e3ac9f280365"
 
 export ami=`aws ec2 describe-images --owners "self" --filters Name=tag:Name,Values=$name --query 'Images[*].ImageId' --output text`
-if [ "$instanceId" != "" ]; then
-  echo Ami with name $name does not exist.
+if [ "$ami" = "" ]; then
+  echo Ami with tag:Name set to $name not found.
   exit 0
 fi
 
@@ -27,7 +27,7 @@ fi
 
 export workspaceVolumeId=`aws ec2 describe-volumes --filters '[{"Name":"tag:Name", "Values":["'$name'"]}]' --query 'Volumes[0]'.VolumeId --output text`
 if [ "$workspaceVolumeId" = "None" ]; then
-  echo Volume with tag:Name eq $name doesn\'t exist
+  echo Volume with tag:Name set to $name not found.
   exit 0
 fi
 
