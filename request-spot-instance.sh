@@ -7,8 +7,8 @@ fi
 # settings
 export envName="main-env"
 export name="spot-instance"
-#export ami="ami-6f587e1c"
-export ami="ami-785db401"
+export ami="ami-785db401" # Ubuntu Server 16.04 LTS (HVM), SSD Volume Type
+#export ami="ami-8ade7df3" # deep learning ami
 
 . $envName-vars.sh
 . utils/create-ssh-key-pair.sh
