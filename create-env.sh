@@ -1,5 +1,5 @@
 export name="main-env"
-export availabilityZone="eu-west-1c"
+export availabilityZone="us-east-1a"
 
 export vpcId=`aws ec2 create-vpc --cidr-block 10.0.0.0/28 --query 'Vpc.VpcId' --output text`
 aws ec2 create-tags --resources $vpcId --tags --tags Key=Name,Value=$name
