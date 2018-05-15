@@ -7,8 +7,8 @@ fi
 # settings
 export envName="main-env"
 export name="spot-instance"
-export ami="ami-785db401" # Ubuntu Server 16.04 LTS (HVM), SSD Volume Type
-#export ami="ami-8ade7df3" # deep learning ami
+export ami="ami-7cf14703" # Deep Learning Base AMI (Ubuntu) Version 5.0
+#export ami="ami-785db401" # Ubuntu Server 16.04 LTS (HVM), SSD Volume Type
 
 . $envName-vars.sh
 . utils/create-ssh-key-pair.sh
@@ -18,7 +18,7 @@ export allocAddr=`aws ec2 allocate-address --domain vpc --query 'AllocationId' -
 export assocId=`aws ec2 associate-address --network-interface-id $networkInterfaceId --allocation-id $allocAddr --query 'AssociationId' --output text`
 export instancePublicIp=`aws ec2 describe-addresses --query 'Addresses[?AssociationId==\`'$assocId'\`][PublicIp]' --output text`
 
-export spotInstanceRequestId=`aws ec2 request-spot-instances --spot-price "$2" --launch-specification '{"ImageId": "'$ami'", "InstanceType": "'$1'", "KeyName": "'aws-key-$name'", "NetworkInterfaces": [{"DeviceIndex": 0, "NetworkInterfaceId": "'$networkInterfaceId'"}], "BlockDeviceMappings": [{"DeviceName": "/dev/sda1", "Ebs": {"VolumeSize": 20, "VolumeType": "gp2", "DeleteOnTermination": true}}]}' --query 'SpotInstanceRequests[0].[SpotInstanceRequestId]' --output text`
+export spotInstanceRequestId=`aws ec2 request-spot-instances --spot-price "$2" --launch-specification '{"ImageId": "'$ami'", "InstanceType": "'$1'", "KeyName": "'aws-key-$name'", "NetworkInterfaces": [{"DeviceIndex": 0, "NetworkInterfaceId": "'$networkInterfaceId'"}], "BlockDeviceMappings": [{"DeviceName": "/dev/sda1", "Ebs": {"VolumeSize": 50, "VolumeType": "gp2", "DeleteOnTermination": true}}]}' --query 'SpotInstanceRequests[0].[SpotInstanceRequestId]' --output text`
 
 export removeFileName=$name-remove.sh
 echo "#!/bin/bash" > $removeFileName

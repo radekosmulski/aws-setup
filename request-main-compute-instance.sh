@@ -4,10 +4,8 @@ if [[ $# -lt 2 ]] ; then
   exit 0
 fi
 
-# settings
 export envName="main-env"
 export name="main-compute-instance"
-#export workspaceVolumeId="vol-08fe7e3ac9f280365"
 
 export ami=`aws ec2 describe-images --owners "self" --filters Name=tag:Name,Values=$name --query 'Images[*].ImageId' --output text`
 if [ "$ami" = "" ]; then
